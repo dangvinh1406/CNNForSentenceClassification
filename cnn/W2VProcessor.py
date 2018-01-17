@@ -7,6 +7,7 @@ import numpy
 class W2VProcessor:
     def __init__(self, originData=None, dataFolder="", vectorSize=100):
         self.__model = None
+        self.__vectorSize = vectorSize
         if type(originData) is str:
             # word2vec.word2phrase(
             #     originData, 
@@ -22,16 +23,33 @@ class W2VProcessor:
 
     def load(self, wordVectorFile):
         self.__model = word2vec.load(wordVectorFile)
+        self.__vectorSize = self.__model.vectors.shape[1]
 
-    def process(self, sentence):
+    def getVectorSize(self):
+        return self.__vectorSize
+
+    def process(self, sentence, length=None):
         if self.__model is None:
             print("Error: The model is None")
             return None
+
+        if not sentence:
+            print("Error: The sentence is None")
+            return None
+
+        if length is None:
+            length = len(sentence)
+        sentence = sentence[:length]
         tensor = []
         for word in sentence:
-            tensor.append(self.__model[word])
-        tensor = numpy.concatenate(tensor).reshape(
-            (len(sentence), len(tensor[0])))
+            try:
+                tensor.append(self.__model[word])
+            except:
+                tensor.append(numpy.zeros((self.__vectorSize,)))
+        for i in range(length-len(sentence)):
+            tensor.append(numpy.zeros(tensor[0].shape))
+        tensor = numpy.concatenate(tensor).reshape((length, len(tensor[0])))
+
         return tensor
 
 

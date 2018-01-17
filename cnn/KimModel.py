@@ -1,7 +1,9 @@
 from __future__ import print_function
 
+from keras import regularizers
 from keras.models import Sequential
-from keras.layers import Input, Conv1D, Merge, Dropout, GlobalMaxPooling1D
+from keras.layers import Conv1D, Dropout, Merge
+from keras.layers import GlobalMaxPooling1D, ZeroPadding1D, Activation
 
 P_DROPOUT = 0.5
 MINI_BATCH_SIZE = 50
@@ -19,9 +21,12 @@ class KimModel:
         # [NOTED] Kim used 2-channels input, static and non-static channels (Section 2, Page 2)
         model = Sequential()
         multiFilterSizeConvolution = []
+
         for h in [3, 4, 5]:
             submodel = Sequential()
-            submodel.add(Input(shape=(self.__numberOfWords, self.__sizeOfWordVectors)))
+            submodel.add(ZeroPadding1D(
+                padding=1, 
+                input_shape=(self.__numberOfWords, self.__sizeOfWordVectors)))
             submodel.add(Conv1D(
                     filters=self.__numberOfFilter, 
                     kernel_size=h, 
@@ -32,6 +37,9 @@ class KimModel:
             submodel.add(GlobalMaxPooling1D())
 
             multiFilterSizeConvolution.append(submodel)
+
+        #  UserWarning: The `Merge` layer is deprecated and will be removed after 08/2017. 
+        #  Use instead layers from `keras.layers.merge`, e.g. `add`, `concatenate`, etc.
         model.add(Merge(multiFilterSizeConvolution, mode="concat"))
         model.add(Dropout(P_DROPOUT))
         model.add(Activation('softmax'))
@@ -39,6 +47,7 @@ class KimModel:
         model.compile(loss='binary_crossentropy',
                   optimizer='adadelta',
                   metrics=['accuracy'])
+        return model
 
     def train(self, X, Y):
         print("Start training")
