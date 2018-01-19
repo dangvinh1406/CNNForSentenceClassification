@@ -7,7 +7,7 @@ This is a small project which implemented based on the paper [Yoon Kim, "Convolu
 * Python 2.7.12
 * [Keras](https://keras.io/): Using Tensorflow backend
 * [word2vec](https://github.com/danielfrg/word2vec): Python wrapper for [Tensorflow's word2vec algorithm](https://www.tensorflow.org/tutorials/word2vec)  
-*For more requirement packages, see the file [requirement.txt](requirement.txt) or using python pip*
+*For more requirement packages, see the file [requirements.txt](requirements.txt) or using python pip*
 ```
 pip install -r requirements.txt
 ```
