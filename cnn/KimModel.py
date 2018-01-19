@@ -2,8 +2,9 @@ from __future__ import print_function
 
 from keras import regularizers
 from keras.models import Sequential
-from keras.layers import Conv1D, Dropout, Merge
+from keras.layers import Conv1D, Dropout, Merge, Dense
 from keras.layers import GlobalMaxPooling1D, ZeroPadding1D, Activation
+from keras.models import load_model
 
 P_DROPOUT = 0.5
 MINI_BATCH_SIZE = 50
@@ -42,6 +43,7 @@ class KimModel:
         #  Use instead layers from `keras.layers.merge`, e.g. `add`, `concatenate`, etc.
         model.add(Merge(multiFilterSizeConvolution, mode="concat"))
         model.add(Dropout(P_DROPOUT))
+        model.add(Dense(1, input_shape=(300,)))
         model.add(Activation('softmax'))
         print('Compiling model')
         model.compile(loss='binary_crossentropy',
@@ -52,14 +54,20 @@ class KimModel:
     def train(self, X, Y):
         print("Start training")
         self.__model.fit([X, X, X], Y, epochs=EPOCHS, batch_size=MINI_BATCH_SIZE)
-        print("Training complete")
+        print("Training completed")
 
-    def save(self):
-        pass
+    def test(self, X, Y):
+        print("Start testing")
+        scores = self.__model.evaluate(X, Y, batch_size=MINI_BATCH_SIZE)
+        print("Testing completed")
+        return scores
 
-    def predict(self):
-        pass
+    def save(self, filename):
+        self.__model.save(filename)
+
+    def load(self, filename):
+        self.__model = load_model(filename)
 
 
-
-
+    def predict(self, sentence):
+        return self.__model.predict([sentence, sentence, sentence])

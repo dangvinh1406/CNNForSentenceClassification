@@ -32,7 +32,7 @@ def convertDataToTensors(
         print("\rSaved tensor "+ouputName+" size "+str(tensor.shape), end="")
         i += 1
 
-def collectTensors(tensorFolder):
+def collectTensors(tensorFolder, ratio=0.7):
     tensorFiles = glob.glob(os.path.join(tensorFolder, "*.npy"))
     random.shuffle(tensorFiles)
     X = []
@@ -42,9 +42,13 @@ def collectTensors(tensorFolder):
         Y.append(int(filename.split("/")[-1][0]))
         print("\rLoaded tensor "+filename, end="")
     print("\nData contains "+str(len(X))+" records ")
-    X = numpy.array(X)
-    print(X.shape)
-    return X, Y
+    XTrain = numpy.array(X[:int(ratio*len(Y))])
+    YTrain = Y[:int(ratio*len(Y))]
+    XTest = numpy.array(X[int(ratio*len(Y)):])
+    YTest = Y[int(ratio*len(Y)):]
+    print("Training data: ", XTrain.shape)
+    print("Testing data: ", XTest.shape)
+    return XTrain, YTrain, XTest, YTest
 
 
 if __name__ == '__main__':
@@ -53,6 +57,7 @@ if __name__ == '__main__':
     dataFolder = "/home/sidratul/repositories/CNNForSentenceClassification/data/rt-polaritydata/"
     outputFolder = "/home/sidratul/repositories/CNNForSentenceClassification/data/tensors/"
     w2vTrainedModel = "/home/sidratul/repositories/word2vec/vectors.bin"
+    modelFile = "/home/sidratul/repositories/CNNForSentenceClassification/data/model.h5"
 
     shutil.rmtree(outputFolder)
     os.mkdir(outputFolder)
@@ -72,5 +77,8 @@ if __name__ == '__main__':
         extractor, sentenceSize, 
         dataFolder+"rt-polarity.pos", outputFolder, "1")
 
-    X, Y = collectTensors(outputFolder)
+    X, Y, x, y = collectTensors(outputFolder)
     model.train(X, Y)
+    model.save(modelFile)
+    scores = model.test(x, y)
+    print("Accuracy: ", scores)
