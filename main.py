@@ -80,5 +80,6 @@ if __name__ == '__main__':
     X, Y, x, y = collectTensors(outputFolder)
     model.train(X, Y)
     model.save(modelFile)
+    model.load(modelFile)
     scores = model.test(x, y)
     print("Accuracy: ", scores)
